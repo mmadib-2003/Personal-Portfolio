@@ -2,7 +2,14 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { Check, Loader2, MessageCircle, Send, TriangleAlert } from "lucide-react";
+import {
+  Check,
+  Download,
+  Loader2,
+  MessageCircle,
+  Send,
+  TriangleAlert,
+} from "lucide-react";
 
 import { submitContactMessage, type ContactState } from "@/app/actions/contact";
 import { Button } from "@/components/ui/button";
@@ -156,6 +163,14 @@ export function ContactDispatch({ profile }: { profile: PortfolioProfile }) {
           <p className="mt-3 font-mono text-[0.6rem] tracking-[0.1em] text-muted-foreground/70 uppercase">
             {profile.location}
           </p>
+          <a
+            href={profile.resumeUrl}
+            download
+            className="group mt-4 inline-flex items-center gap-1.5 text-[0.8rem] text-muted-foreground underline decoration-border underline-offset-4 transition-colors hover:text-primary hover:decoration-primary/60"
+          >
+            or download my full CV here
+            <Download className="size-3 shrink-0 transition-transform group-hover:translate-y-0.5" />
+          </a>
         </div>
       </aside>
     </div>

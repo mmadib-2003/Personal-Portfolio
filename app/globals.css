@@ -308,3 +308,59 @@
     background-clip: content-box;
   }
 }
+
+/* Print styles — /cv is meant to print as a clean document.
+   Everything chrome-like is hidden; the CV body switches to black on white
+   so a browser "Save as PDF" produces something worth sending to a recruiter. */
+@media print {
+  :root {
+    --background: #ffffff;
+    --foreground: #111111;
+    --primary: #067a4b;
+    --muted-foreground: #444444;
+    --border: #d8d8d8;
+    --card: #ffffff;
+    --secondary: #f4f4f4;
+  }
+
+  header,
+  footer,
+  [aria-label="SOC Assistant chat"],
+  button[aria-controls="soc-assistant-panel"] {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+
+  .hud-grid,
+  .scanlines {
+    display: none !important;
+  }
+
+  /* The two-column CV collapses to one column so nothing is clipped. */
+  .cv-grid {
+    display: block !important;
+  }
+
+  .cv-grid > * + * {
+    margin-top: 18px;
+  }
+
+  section {
+    padding: 0 !important;
+    break-inside: avoid;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.65em;
+    color: #555555;
+  }
+
+  @page {
+    margin: 14mm;
+  }
+}

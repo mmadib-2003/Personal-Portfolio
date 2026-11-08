@@ -9,6 +9,7 @@ import type {
   WriteupSummary,
 } from "@/lib/types";
 import { SKILL_CATEGORIES } from "@/lib/types";
+import { CV_PATH } from "@/lib/site";
 
 /**
  * Canonical, code-level fallback content.
@@ -38,7 +39,7 @@ export const FALLBACK_PROFILE: PortfolioProfile = {
   whatsapp: "8801722194398",
   githubUrl: "https://github.com/mmadib-2003",
   linkedinUrl: "https://www.linkedin.com/in/muntasir-adib-947687233/",
-  resumeUrl: "/resume/muntasir-adib-resume.txt",
+  resumeUrl: CV_PATH,
   university: "Institute of Information Technology, Jahangirnagar University",
   degree: "B.Sc. in Information and Communication Technology (ICT)",
   availability: "Open to SOC internships & entry-level blue team roles",

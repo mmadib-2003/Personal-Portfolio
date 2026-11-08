@@ -8,8 +8,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ChatWidget } from "@/components/chat/chat-widget";
 import { getProfile } from "@/lib/queries";
-
-const SITE_URL = "https://personalportfolio-rust-nu.vercel.app";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

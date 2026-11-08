@@ -82,12 +82,11 @@ export function Hero({
               </Link>
               <a
                 href={profile.resumeUrl}
-                target="_blank"
-                rel="noreferrer"
+                download
                 className={buttonVariants({ variant: "outline", size: "lg" })}
               >
                 <Download className="size-4" />
-                Download resume
+                Download CV
               </a>
               <a
                 href={profile.githubUrl}

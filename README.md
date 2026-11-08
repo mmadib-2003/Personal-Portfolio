@@ -48,6 +48,8 @@ breaking the page. Nothing whitescreens on a fresh clone.
 | `GITHUB_TOKEN` | server | optional | Raises the GitHub API rate limit for the agent's repo tool |
 | `AI_GATEWAY_API_KEY` | server | yes for chat | Vercel AI Gateway credential |
 | `AI_MODEL_ID` | server | optional | Gateway model id (default `openai/gpt-4o-mini`) |
+| `NEXT_PUBLIC_SITE_URL` | public | optional | Canonical origin for metadata, sitemap, robots (default `https://muntasir-adib-portfolio.vercel.app`) |
+| `AI_GATEWAY_BASE_URL` | server | optional | Local only — points the agent at `scripts/mock-gateway.mjs` |
 
 Set the same variables in **Vercel → Project → Settings → Environment Variables**
 for Production *and* Preview. On Vercel, the AI Gateway can also authenticate via
@@ -136,6 +138,7 @@ Additional hardening:
 ```
 app/
   layout.tsx                 Fonts, theme provider, header/footer, chat widget
+  cv/page.tsx                Web CV + working "Download PDF" / print actions
   page.tsx                   Home: HUD hero, briefing, radar, projects, triage, write-ups, contact
   projects/page.tsx          Filterable archive (client-side filter + search)
   projects/[slug]/page.tsx   Project detail (SSG from Supabase, falls back to seed)
@@ -183,12 +186,38 @@ The chat route validates and sanitises the request, then hands it to a
 
 ```ts
 new ToolLoopAgent({
-  model: serverEnv.modelId,          // AI Gateway route, e.g. openai/gpt-4o-mini
+  model: resolveChatModel(),         // AI Gateway route, e.g. openai/gpt-4o-mini
   instructions: buildSystemPrompt(profile),
   tools: portfolioTools,
   temperature: 0.3,
+  stopWhen: stepCountIs(4),          // tool-only steps never end the turn
 });
 ```
+
+Credentials resolve through `@ai-sdk/gateway`: `AI_GATEWAY_API_KEY` first, then
+Vercel OIDC (automatic on a Vercel deployment, which is why the route checks
+`VERCEL` as well as the key before reporting the assistant "unconfigured").
+
+**Failure behaviour.** A streaming response cannot change its status code once
+bytes have been sent, so upstream errors are surfaced *inside* the stream via
+`onError`, mapped to readable copy ("Connection lost. Please try again.",
+"…could not authenticate with the AI Gateway…"). The widget classifies those
+messages, offers a Retry, and falls back to a direct email link.
+
+**Testing without a Gateway key.** `scripts/mock-gateway.mjs` speaks the
+provider's SSE frame format, so the whole path (route → agent → tools → stream)
+runs offline:
+
+```bash
+pnpm mock:gateway        # terminal 1 — http://127.0.0.1:4010
+pnpm dev                 # terminal 2, with:
+#   AI_GATEWAY_API_KEY=mock-local-key
+#   AI_GATEWAY_BASE_URL=http://127.0.0.1:4010
+```
+
+Then POST to `/api/chat` and watch `tool-input-available` → `tool-output-available`
+→ `text-delta`. Anything other than the mock key returns 401, which exercises the
+auth-failure copy.
 
 Tools (`lib/ai/tools.ts`), all read-only:
 
@@ -263,6 +292,13 @@ update public.skills set proficiency = 5 where name = 'Wireshark';
 -- take something offline
 update public.projects set is_published = false where slug = 'old-lab';
 ```
+
+**CV updates.** The downloadable CV is a static file: replace
+`public/Muntasir_Adib_CV.pdf` and redeploy. Three places link to it — the hero
+CTA, the `/cv` page ("Download PDF") and the contact panel's "or download my full
+CV here" — and all of them read `CV_PATH` from `lib/site.ts`, so the filename
+never has to be edited in more than one place. The plain-text ATS copy lives at
+`public/resume/muntasir-adib-resume.txt`.
 
 The only content kept in code is the four SOC triage drills
 (`lib/soc-scenarios.ts`) — they are interactive reference playbooks rather than

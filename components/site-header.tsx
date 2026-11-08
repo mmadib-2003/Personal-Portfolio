@@ -14,6 +14,7 @@ const LINKS = [
   { href: "/writeups", label: "Write-ups" },
   { href: "/#capability", label: "Capabilities" },
   { href: "/#triage", label: "Triage Lab" },
+  { href: "/cv", label: "CV" },
   { href: "/#contact", label: "Contact" },
 ];
 
@@ -72,13 +73,15 @@ export function SiteHeader() {
                 ? pathname.startsWith("/projects")
                 : link.href === "/writeups"
                   ? pathname.startsWith("/writeups")
-                  : false;
+                  : link.href === "/cv"
+                    ? pathname === "/cv"
+                    : false;
             return (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "rounded px-3 py-2 font-mono text-[0.72rem] tracking-[0.08em] uppercase transition-colors",
+                  "rounded px-2.5 py-2 font-mono text-[0.7rem] tracking-[0.08em] uppercase transition-colors xl:px-3 xl:text-[0.72rem]",
                   active
                     ? "text-primary"
                     : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",

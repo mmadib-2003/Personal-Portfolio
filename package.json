@@ -2,14 +2,15 @@
   "name": "muntasir-adib-portfolio",
   "version": "1.0.0",
   "private": true,
-  "description": "SOC-themed interactive portfolio for Muntasir Adib \u2014 aspiring Cybersecurity Analyst.",
+  "description": "SOC-themed interactive portfolio for Muntasir Adib — aspiring Cybersecurity Analyst.",
   "packageManager": "pnpm@12.18.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "mock:gateway": "node scripts/mock-gateway.mjs 4010"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^4.0.138",
