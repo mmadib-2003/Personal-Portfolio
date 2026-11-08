@@ -1,0 +1,80 @@
+MUNTASIR ADIB
+Aspiring Cybersecurity Analyst — SOC Operations · Threat Detection · Incident Response
+Dhaka, Bangladesh · mmadib2001@gmail.com · +880 1722 194398
+github.com/mmadib-2003 · linkedin.com/in/muntasir-adib-947687233
+
+------------------------------------------------------------------------------
+PROFILE
+------------------------------------------------------------------------------
+Blue-team focused analyst-in-training with a working grasp of SOC operations,
+network traffic analysis and incident triage. Pursuing a B.Sc. in ICT at the
+Institute of Information Technology, Jahangirnagar University. Builds
+defensive labs, documents verdicts, and publishes tooling on GitHub.
+
+Actively seeking an internship or entry-level SOC / blue-team role.
+
+------------------------------------------------------------------------------
+FOCUS AREAS
+------------------------------------------------------------------------------
+SOC Operations · Threat Detection · Incident Response Fundamentals
+Blue teaming · Network traffic monitoring · Triage workflows
+
+------------------------------------------------------------------------------
+EDUCATION
+------------------------------------------------------------------------------
+B.Sc. in Information and Communication Technology (ICT)
+Institute of Information Technology, Jahangirnagar University
+
+------------------------------------------------------------------------------
+TECHNICAL COMPETENCIES
+------------------------------------------------------------------------------
+Linux Administration      Shell, systemd, permissions, log inspection
+Networking & Packet Analysis
+                          TCP/IP, DNS, HTTP; Wireshark, tcpdump, Nmap
+Web Application Security  OWASP Top 10, request/response analysis, Burp Suite
+Python Scripting          Log parsers, enrichment, defensive automation
+SOC Tooling               SIEM concepts, Splunk/ELK basics, Git, Docker basics
+
+------------------------------------------------------------------------------
+SELECTED PROJECTS
+------------------------------------------------------------------------------
+CyberShield — Mini SOC Detection Software
+  Full-stack real-time security monitoring dashboard: synthetic event
+  generation, risk scoring, incident lifecycle tracking and live alerting.
+  Next.js · TypeScript · Prisma · real-time streaming
+
+Campus 360 BD — Activity Management Platform
+  Role-aware campus activity management system; authorisation boundary
+  design across a multi-tenant surface.
+  Next.js · TypeScript · Supabase
+
+Packet Triage Lab — PCAP to Verdict
+  Repeatable Wireshark + Python workflow converting raw captures into a
+  documented triage verdict with severity and recommended action.
+
+Log Enrichment Scripts
+  Python helpers that normalise, parse and enrich raw logs into queryable
+  events ahead of SIEM ingestion.
+
+Schedule & Reminder Application
+  Calendar-centric time management application modelling events,
+  recurrence and reminders. Java · OOP
+
+------------------------------------------------------------------------------
+HANDS-ON PRACTICE
+------------------------------------------------------------------------------
+04 published triage write-ups:
+  · Ransomware Triage: First 15 Minutes
+  · Hunting Beaconing Patterns in Packet Captures
+  · DNS Tunnelling: A Triage Walkthrough
+  · Phishing Triage Ladder
+
+Four interactive SOC drills on the portfolio site (ransomware triage,
+beaconing hunt, phishing report, DNS tunnelling exfiltration).
+
+------------------------------------------------------------------------------
+LINKS
+------------------------------------------------------------------------------
+Portfolio   https://personalportfolio-rust-nu.vercel.app
+GitHub      https://github.com/mmadib-2003
+LinkedIn    https://www.linkedin.com/in/muntasir-adib-947687233/

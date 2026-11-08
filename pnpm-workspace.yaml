@@ -1,0 +1,5 @@
+# pnpm 12 refuses to install packages published in the last N minutes.
+# The AI SDK (`ai@7`, `@ai-sdk/*`) releases we depend on are newer than that
+# window, so the policy is disabled explicitly rather than silently bypassed.
+# Raise this (e.g. `1440`) if you want the supply-chain guard back.
+minimumReleaseAge: 0
