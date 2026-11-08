@@ -1,8 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { getProjects, getWriteupSummaries } from "@/lib/queries";
-
-const BASE = "https://personalportfolio-rust-nu.vercel.app";
+import { SITE_URL } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [{ data: projects }, { data: writeups }] = await Promise.all([
@@ -13,17 +12,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
   return [
-    { url: BASE, lastModified: now, changeFrequency: "monthly", priority: 1 },
-    { url: `${BASE}/projects`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${BASE}/writeups`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: SITE_URL, lastModified: now, changeFrequency: "monthly", priority: 1 },
+    { url: `${SITE_URL}/projects`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/writeups`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/cv`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
     ...projects.map((project) => ({
-      url: `${BASE}/projects/${project.slug}`,
+      url: `${SITE_URL}/projects/${project.slug}`,
       lastModified: new Date(project.created_at),
       changeFrequency: "monthly" as const,
       priority: 0.6,
     })),
     ...writeups.map((writeup) => ({
-      url: `${BASE}/writeups/${writeup.slug}`,
+      url: `${SITE_URL}/writeups/${writeup.slug}`,
       lastModified: new Date(writeup.published_at),
       changeFrequency: "monthly" as const,
       priority: 0.6,

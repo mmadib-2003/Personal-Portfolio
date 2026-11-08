@@ -10,6 +10,7 @@ import {
   FALLBACK_WRITEUPS,
   buildRadarAxes,
 } from "@/lib/fallback-data";
+import { CV_PATH } from "@/lib/site";
 import type {
   PortfolioProfile,
   ProfileFact,
@@ -65,7 +66,7 @@ function factsToProfile(facts: ProfileFact[]): PortfolioProfile {
     whatsapp: get("whatsapp", FALLBACK_PROFILE.whatsapp),
     githubUrl: get("github_url", FALLBACK_PROFILE.githubUrl),
     linkedinUrl: get("linkedin_url", FALLBACK_PROFILE.linkedinUrl),
-    resumeUrl: get("resume_url", FALLBACK_PROFILE.resumeUrl),
+    resumeUrl: get("resume_url", CV_PATH),
     university: get("university", FALLBACK_PROFILE.university),
     degree: get("degree", FALLBACK_PROFILE.degree),
     availability: get("availability", FALLBACK_PROFILE.availability),

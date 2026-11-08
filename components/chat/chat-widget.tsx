@@ -4,10 +4,12 @@ import * as React from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import {
+  AlertTriangle,
   ArrowUp,
   Bot,
   Loader2,
   Minimize2,
+  RefreshCw,
   Sparkles,
   User,
   X,
@@ -17,22 +19,53 @@ import type { PortfolioProfile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const STARTERS = [
-  "What SOC projects has Muntasir built?",
+  "What Python projects does Muntasir have?",
   "How strong is he with Wireshark?",
   "Show me his GitHub repositories",
   "Is he available for an internship?",
 ];
 
+type FailureKind = "unconfigured" | "auth" | "rate-limit" | "network" | "generic";
+
+const FAILURE_COPY: Record<FailureKind, string> = {
+  unconfigured:
+    "The SOC Assistant is not enabled on this deployment yet. Email Muntasir directly and he will answer personally.",
+  auth: "The assistant could not reach its model provider. Please try again shortly, or email Muntasir directly.",
+  "rate-limit": "Too many questions in a row. Give it a minute, then try again.",
+  network: "Connection lost. Please try again.",
+  generic: "Connection lost. Please try again.",
+};
+
+/**
+ * `useChat` surfaces failures as an `Error` whose message is whatever the route
+ * put in the stream's `error` event (or the HTTP status text). Classify it so
+ * the copy is actionable rather than a stack trace.
+ */
+function classifyFailure(error: Error | undefined): FailureKind | null {
+  if (!error) return null;
+  const text = `${error.message ?? ""}`.toLowerCase();
+
+  if (/not configured|unconfigured|503/.test(text)) return "unconfigured";
+  if (/authenticate|authentication|api key|401|403|unauthor/.test(text)) return "auth";
+  if (/rate limit|too many|429/.test(text)) return "rate-limit";
+  if (/connection lost|network|fetch failed|timeout|timed out|disconnect/.test(text)) {
+    return "network";
+  }
+  return "generic";
+}
+
 /**
  * Floating streaming chat — the "SOC Assistant".
  *
- * Streaming comes from /api/chat via the AI SDK's UI message protocol, so
- * tool calls resolve server-side and tokens render as they arrive. The panel
- * is fully keyboard accessible and traps nothing: Escape closes it.
+ * Streaming comes from /api/chat via the AI SDK's UI message protocol, so tool
+ * calls resolve server-side and tokens render as they arrive. The panel is
+ * keyboard accessible: Escape closes it, Enter sends, Shift+Enter newlines.
  */
 export function ChatWidget({ profile }: { profile: PortfolioProfile }) {
   const [open, setOpen] = React.useState(false);
   const [input, setInput] = React.useState("");
+  // The SDK does not clear the composer for us: it only hands `sendMessage`
+  // the text. Keep the draft locally and reset it on a successful submit.
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
 
@@ -41,21 +74,14 @@ export function ChatWidget({ profile }: { profile: PortfolioProfile }) {
     [],
   );
 
-  const { messages, sendMessage, status, error } = useChat({ transport });
+  const { messages, sendMessage, status, error, clearError, regenerate } =
+    useChat({ transport });
 
-  // Derived, not stored: the endpoint answers 503 when the Gateway key is
-  // missing, and the SDK surfaces that message on `error`.
-  const unavailable = React.useMemo(() => {
-    if (!error) return null;
-    const message = `${error.message ?? ""}`;
-    if (message.includes("503") || /unconfigured|not configured/i.test(message)) {
-      return "The AI assistant is not enabled on this deployment yet. You can still reach Muntasir directly.";
-    }
-    return null;
-  }, [error]);
-
+  const failure = React.useMemo(() => classifyFailure(error), [error]);
+  const offline = failure === "unconfigured";
   const busy = status === "submitted" || status === "streaming";
 
+  // Pinned to the bottom while new tokens arrive.
   React.useEffect(() => {
     if (!open) return;
     const node = scrollRef.current;
@@ -77,9 +103,11 @@ export function ChatWidget({ profile }: { profile: PortfolioProfile }) {
 
   const send = (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || busy || unavailable) return;
-    sendMessage({ text: trimmed.slice(0, 1200) });
+    if (!trimmed || busy || offline) return;
+    // A retry after an error starts from a clean slate.
+    if (error) clearError();
     setInput("");
+    sendMessage({ text: trimmed.slice(0, 1200) });
   };
 
   return (
@@ -132,7 +160,7 @@ export function ChatWidget({ profile }: { profile: PortfolioProfile }) {
             <div className="leading-tight">
               <p className="font-mono text-[0.75rem] font-semibold">SOC Assistant</p>
               <p className="font-mono text-[0.55rem] tracking-[0.14em] text-muted-foreground uppercase">
-                grounded on portfolio data + github
+                {busy ? "analysing…" : "grounded on portfolio data + github"}
               </p>
             </div>
           </div>
@@ -151,6 +179,7 @@ export function ChatWidget({ profile }: { profile: PortfolioProfile }) {
           ref={scrollRef}
           className="flex-1 space-y-4 overflow-y-auto px-4 py-4"
           aria-live="polite"
+          aria-busy={busy}
         >
           {messages.length === 0 ? (
             <div className="space-y-4">
@@ -170,7 +199,7 @@ export function ChatWidget({ profile }: { profile: PortfolioProfile }) {
                     key={starter}
                     type="button"
                     onClick={() => send(starter)}
-                    disabled={Boolean(unavailable)}
+                    disabled={offline}
                     className="rounded border border-border px-3 py-2 text-left text-[0.78rem] text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {starter}
@@ -184,7 +213,8 @@ export function ChatWidget({ profile }: { profile: PortfolioProfile }) {
             const text = message.parts
               .filter(
                 (part): part is { type: "text"; text: string } =>
-                  part.type === "text" && typeof (part as { text?: unknown }).text === "string",
+                  part.type === "text" &&
+                  typeof (part as { text?: unknown }).text === "string",
               )
               .map((part) => part.text)
               .join("\n");
@@ -215,7 +245,7 @@ export function ChatWidget({ profile }: { profile: PortfolioProfile }) {
                 </span>
                 <div
                   className={cn(
-                    "min-w-0 max-w-[85%] rounded-lg px-3 py-2 text-[0.82rem] leading-relaxed",
+                    "max-w-[85%] min-w-0 rounded-lg px-3 py-2 text-[0.82rem] leading-relaxed",
                     isUser
                       ? "bg-secondary text-secondary-foreground"
                       : "border border-border bg-background/60",
@@ -235,39 +265,62 @@ export function ChatWidget({ profile }: { profile: PortfolioProfile }) {
                     </div>
                   ) : null}
                   {text ? (
-                    <p className="whitespace-pre-wrap break-words">{text}</p>
+                    <p className="break-words whitespace-pre-wrap">{text}</p>
                   ) : null}
                 </div>
               </div>
             );
           })}
 
-          {status === "submitted" ? (
+          {/* thinking indicator */}
+          {busy ? (
             <div className="flex items-center gap-2 pl-9 font-mono text-[0.65rem] tracking-[0.1em] text-muted-foreground uppercase">
               <Loader2 className="size-3 animate-spin" />
-              analyst is checking the logs…
+              {status === "submitted"
+                ? "analyst is checking the logs"
+                : "analyst is writing"}
+              <span className="animate-caret text-primary" aria-hidden>
+                ▍
+              </span>
             </div>
           ) : null}
 
-          {unavailable ? (
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-[0.78rem] leading-relaxed text-amber-600 dark:text-amber-400">
-              {unavailable}{" "}
-              <a
-                href={`mailto:${profile.email}`}
-                className="underline underline-offset-2"
-              >
-                {profile.email}
-              </a>
-            </div>
-          ) : null}
-
-          {error && !unavailable ? (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-[0.78rem] leading-relaxed text-destructive">
-              Something went wrong reaching the assistant. You can retry, or email{" "}
-              <a href={`mailto:${profile.email}`} className="underline underline-offset-2">
-                {profile.email}
-              </a>
-              .
+          {/* failure states */}
+          {failure ? (
+            <div
+              className={cn(
+                "rounded-lg border p-3 text-[0.78rem] leading-relaxed",
+                offline
+                  ? "border-amber-500/30 bg-amber-500/5 text-amber-600 dark:text-amber-400"
+                  : "border-destructive/30 bg-destructive/5 text-destructive",
+              )}
+            >
+              <p className="flex items-start gap-1.5">
+                <AlertTriangle className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+                {FAILURE_COPY[failure]}
+              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                {!offline ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearError();
+                      regenerate();
+                    }}
+                    disabled={busy}
+                    className="inline-flex items-center gap-1 font-mono text-[0.62rem] tracking-[0.1em] uppercase underline underline-offset-2 hover:no-underline disabled:opacity-50"
+                  >
+                    <RefreshCw className="size-3" />
+                    Retry
+                  </button>
+                ) : null}
+                <a
+                  href={`mailto:${profile.email}`}
+                  className="font-mono text-[0.62rem] tracking-[0.1em] uppercase underline underline-offset-2 hover:no-underline"
+                >
+                  {profile.email}
+                </a>
+              </div>
             </div>
           ) : null}
         </div>
@@ -297,14 +350,19 @@ export function ChatWidget({ profile }: { profile: PortfolioProfile }) {
                 }
               }}
               placeholder={
-                unavailable ? "Assistant offline — email Muntasir" : "Ask about skills, projects, repos…"
+                offline
+                  ? "Assistant offline — email Muntasir"
+                  : busy
+                    ? "Waiting for the analyst…"
+                    : "Ask about skills, projects, repos…"
               }
-              disabled={Boolean(unavailable)}
+              disabled={offline}
+              aria-invalid={Boolean(failure)}
               className="max-h-28 min-h-9 flex-1 resize-none bg-transparent px-2 py-1.5 text-[0.82rem] placeholder:text-muted-foreground/70 focus:outline-none disabled:cursor-not-allowed"
             />
             <button
               type="submit"
-              disabled={busy || !input.trim() || Boolean(unavailable)}
+              disabled={busy || !input.trim() || offline}
               aria-label="Send message"
               className="grid size-8 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground transition-opacity disabled:opacity-40"
             >

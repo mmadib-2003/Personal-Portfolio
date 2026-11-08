@@ -38,10 +38,32 @@ export const serverEnv = {
   get gatewayApiKey() {
     return readEnv("AI_GATEWAY_API_KEY") ?? readEnv("VERCEL_AI_GATEWAY_KEY");
   },
+  /** Local/testing override only — unset on Vercel. */
+  get gatewayBaseUrl() {
+    return readEnv("AI_GATEWAY_BASE_URL");
+  },
   get modelId() {
     return readEnv("AI_MODEL_ID") ?? "openai/gpt-4o-mini";
   },
 };
+
+/**
+ * True when the assistant has a usable credential.
+ *
+ * On Vercel the Gateway authenticates with the OIDC token, which the platform
+ * injects per-request rather than as a build-time env var — so checking only
+ * `AI_GATEWAY_API_KEY` would wrongly report "unconfigured" on a live
+ * deployment.
+ */
+export function isAssistantConfigured(): boolean {
+  return Boolean(
+    serverEnv.gatewayApiKey ||
+      // Vercel OIDC: a platform-provided build/runtime token, or the
+      // per-request token the SDK reads from the request context.
+      process.env.VERCEL_OIDC_TOKEN ||
+      process.env.VERCEL === "1",
+  );
+}
 
 export const GITHUB_OWNER = "mmadib-2003";
 
