@@ -27,7 +27,7 @@ insert into public.profile (key, value, label, is_public) values
   ('whatsapp', '8801722194398', 'WhatsApp number', true),
   ('github_url', 'https://github.com/mmadib-2003', 'GitHub profile', true),
   ('linkedin_url', 'https://www.linkedin.com/in/muntasir-adib-947687233/', 'LinkedIn profile', true),
-  ('resume_url', '/resume/muntasir-adib-resume.txt', 'Resume download', true),
+  ('resume_url', '/Muntasir_Adib_CV.pdf', 'CV download', true),
   ('university', 'Institute of Information Technology, Jahangirnagar University', 'University', true),
   ('degree', 'B.Sc. in Information and Communication Technology (ICT)', 'Degree', true),
   ('availability', 'Open to SOC internships & entry-level blue team roles', 'Availability', true),
