@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="#060809"/>
+  <polygon points="32,7 53,19 53,45 32,57 11,45 11,19" fill="none" stroke="#35f08e" stroke-width="2.5" stroke-opacity="0.85"/>
+  <text x="32" y="40" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, monospace" font-size="20" font-weight="700" fill="#35f08e">MA</text>
+</svg>
